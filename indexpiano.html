@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>piano.</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:#E8E2D9;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif}
+.shell{width:100%;max-width:430px;height:100vh;background:#FAF7F2;display:flex;flex-direction:column;overflow:hidden}
+@media(min-width:500px){.shell{height:844px;border-radius:44px;box-shadow:0 40px 80px rgba(0,0,0,.28)}}
+.header{padding:48px 20px 12px;border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0;background:#FAF7F2}
+.app-name{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:#1C1C1C}
+.week-nav{display:flex;align-items:center;gap:8px;margin-top:6px}
+.week-label-text{flex:1;font-size:12px;color:#5C5347;font-weight:500}
+.nav-btn{width:28px;height:28px;border:1.5px solid #DDD7CF;border-radius:8px;background:white;cursor:pointer;font-size:13px;color:#5C5347;display:flex;align-items:center;justify-content:center}
+.today-btn{padding:0 10px;height:28px;border:1.5px solid #DDD7CF;border-radius:8px;background:white;cursor:pointer;font-size:11px;font-weight:600;color:#5C5347;font-family:'DM Sans',sans-serif}
+.search-bar{padding:10px 20px;border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0;background:#FAF7F2}
+.search-row{display:flex;gap:8px}
+.search-input{flex:1;padding:11px 16px;border:1.5px solid #E8E2D9;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;background:white;outline:none;color:#1C1C1C}
+.search-input:focus{border-color:#1C1C1C}
+.search-input::placeholder{color:#C8BFB0}
+.search-btn{width:44px;height:44px;background:#1C1C1C;border:none;border-radius:14px;cursor:pointer;font-size:20px;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tabs{display:flex;border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0;background:#FAF7F2}
+.tab{flex:1;padding:10px 0;font-size:13px;font-weight:500;background:none;border:none;cursor:pointer;color:#9E9488;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'DM Sans',sans-serif}
+.tab.active{color:#1C1C1C;border-bottom-color:#1C1C1C;font-weight:600}
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.prio-list{flex:1;overflow-y:auto;padding:12px 20px}
+.sec-label{font-size:10px;font-weight:700;letter-spacing:.09em;color:#9E9488;text-transform:uppercase;margin-bottom:8px;margin-top:14px}
+.sec-label:first-child{margin-top:0}
+.pcard{background:white;border-radius:14px;margin-bottom:8px;box-shadow:0 1px 6px rgba(0,0,0,.06);position:relative;overflow:hidden}
+.pcard-main{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 17px}
+.pcard-bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:14px 0 0 14px}
+.pcard-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.pcard-text{flex:1;font-size:14px;color:#1C1C1C;line-height:1.3;font-weight:500}
+.pcard-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0}
+.pcard-del{width:20px;height:20px;border-radius:50%;background:#F0EDE7;border:none;cursor:pointer;font-size:10px;color:#9E9488;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.subtasks{padding:0 12px 10px 17px;border-top:1px solid rgba(0,0,0,.05)}
+.subtask-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.04)}
+.subtask-item:last-child{border-bottom:none}
+.subtask-check{width:16px;height:16px;border-radius:4px;border:1.5px solid #DDD7CF;background:white;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px}
+.subtask-check.done{background:#6BAA75;border-color:#6BAA75;color:white}
+.subtask-content{flex:1;min-width:0}
+.subtask-text{font-size:12px;color:#5C5347;line-height:1.4}
+.subtask-text.done{text-decoration:line-through;color:#C8BFB0}
+.subtask-deadline{font-size:10px;color:#C8BFB0;margin-top:2px}
+.subtask-deadline.urgent{color:#FF6B6B;font-weight:600}
+.subtask-actions{display:flex;gap:4px;flex-shrink:0;margin-top:1px}
+.ai-btn{background:#F0ECFC;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px;color:#9B8EC4;font-family:'DM Sans',sans-serif;font-weight:600}
+.ai-btn:disabled{opacity:.4;cursor:not-allowed}
+.subtask-del{font-size:10px;color:#C8BFB0;background:none;border:none;cursor:pointer;padding:3px}
+.ai-response{margin:4px 0 6px;background:#F0ECFC;border-radius:10px;padding:10px 12px;border-left:3px solid #9B8EC4}
+.ai-response-text{font-size:12px;color:#4A3870;line-height:1.6;white-space:pre-wrap}
+.ai-loading{display:flex;align-items:center;gap:6px;font-size:12px;color:#9B8EC4;padding:6px 0}
+.ai-dot{width:5px;height:5px;border-radius:50%;background:#9B8EC4;animation:pulse 1s ease-in-out infinite}
+.ai-dot:nth-child(2){animation-delay:.2s}
+.ai-dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+.add-subtask{display:flex;gap:6px;margin-top:8px;align-items:center}
+.add-sub-input{flex:1;padding:6px 10px;border:1.5px solid #E8E2D9;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;color:#1C1C1C;background:#FAF7F2;outline:none}
+.add-sub-date{width:110px;padding:6px 8px;border:1.5px solid #E8E2D9;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:11px;color:#5C5347;background:#FAF7F2;outline:none}
+.add-sub-btn{width:28px;height:28px;background:#1C1C1C;border:none;border-radius:7px;cursor:pointer;font-size:16px;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.expand-btn{width:100%;padding:5px 0;background:none;border:none;cursor:pointer;font-size:11px;color:#9E9488;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;border-top:1px solid rgba(0,0,0,.04)}
+.week-view{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.unassigned{padding:8px 20px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;gap:8px;align-items:center;overflow-x:auto;min-height:46px;flex-shrink:0}
+.u-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#9E9488;white-space:nowrap;flex-shrink:0}
+.mini{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:500;white-space:nowrap;flex-shrink:0;cursor:pointer}
+.mini-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.days-wrap{flex:1;overflow-y:auto;padding:10px 20px;display:flex;flex-direction:column;gap:6px}
+.day-row{border-radius:14px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.day-row-header{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer}
+.day-pill{display:flex;flex-direction:column;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;flex-shrink:0}
+.day-pill .dn{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:1}
+.day-pill .dd{font-size:17px;font-weight:700;line-height:1.1}
+.day-tasks-preview{flex:1;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.day-chip{font-size:11px;font-weight:500;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.day-tasks-expanded{padding:0 14px 10px}
+.day-task-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.day-task-row:last-child{border-bottom:none}
+.day-task-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.day-task-text{flex:1;font-size:13px;color:#1C1C1C;font-weight:500}
+.day-task-move{font-size:10px;background:rgba(255,255,255,.7);border:none;border-radius:5px;padding:2px 7px;cursor:pointer;font-family:'DM Sans',sans-serif;color:#5C5347}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;z-index:200;backdrop-filter:blur(4px)}
+.sheet{background:white;border-radius:24px 24px 0 0;padding:24px 24px 48px;width:100%;max-width:430px;margin:0 auto;animation:up .25s ease;max-height:80vh;overflow-y:auto}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-title{font-family:'Playfair Display',serif;font-size:22px;color:#1C1C1C;margin-bottom:6px}
+.sheet-sub{font-size:13px;color:#9E9488;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.day-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.day-opt{padding:10px 4px;border:1.5px solid #E8E2D9;border-radius:12px;background:white;cursor:pointer;text-align:center;font-family:'DM Sans',sans-serif}
+.day-opt.sel{border-color:#1C1C1C;background:#1C1C1C}
+.day-opt .don{font-size:10px;font-weight:700;text-transform:uppercase;color:#9E9488}
+.day-opt.sel .don{color:rgba(255,255,255,.55)}
+.day-opt .dod{font-size:17px;font-weight:700;color:#1C1C1C}
+.day-opt.sel .dod{color:white}
+.unassign-opt{padding:10px 4px;border:1.5px solid #E8E2D9;border-radius:12px;background:white;cursor:pointer;text-align:center;font-family:'DM Sans',sans-serif}
+.cancel{width:100%;padding:14px;background:#F0EDE7;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#5C5347;cursor:pointer;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect}=React;
+
+const API_KEY="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";
+const MAX_SEARCHES=10;
+
+const DAY_COLORS=[
+  {bg:'#FF6B6B',light:'#FFF0F0',text:'#C41E1E'},
+  {bg:'#F5A623',light:'#FFF7E6',text:'#7A4A00'},
+  {bg:'#6BAA75',light:'#EDF7EE',text:'#2D5C34'},
+  {bg:'#5BA4CF',light:'#E6F4FF',text:'#1A5A8A'},
+  {bg:'#9B8EC4',light:'#F0ECFC',text:'#4A3870'},
+  {bg:'#E8748A',light:'#FDEEF2',text:'#8C1D35'},
+  {bg:'#5BBFAD',light:'#E6F7F4',text:'#1A6B5C'},
+];
+const PRIO_COLORS=[
+  {bg:'#FF6B6B',light:'#FFF0F0',text:'#C41E1E'},
+  {bg:'#6BAA75',light:'#EDF7EE',text:'#2D5C34'},
+  {bg:'#9B8EC4',light:'#F0ECFC',text:'#4A3870'},
+  {bg:'#F5A623',light:'#FFF7E6',text:'#7A4A00'},
+  {bg:'#5BA4CF',light:'#E6F4FF',text:'#1A5A8A'},
+  {bg:'#E8748A',light:'#FDEEF2',text:'#8C1D35'},
+  {bg:'#5BBFAD',light:'#E6F7F4',text:'#1A6B5C'},
+];
+const DAY_NAMES=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+
+function getMondayOf(offset=0){
+  const today=new Date();
+  const dow=today.getDay();
+  const monday=new Date(today);
+  monday.setDate(today.getDate()-((dow+6)%7)+offset*7);
+  monday.setHours(0,0,0,0);
+  return monday;
+}
+function getWeekDays(offset=0){
+  const monday=getMondayOf(offset);
+  const today=new Date(); today.setHours(0,0,0,0);
+  return Array.from({length:7},(_,i)=>{
+    const d=new Date(monday);
+    d.setDate(monday.getDate()+i);
+    return{key:`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`,dayIndex:i,label:DAY_NAMES[i],num:d.getDate(),month:d.toLocaleDateString('it-IT',{month:'short'}),isToday:d.getTime()===today.getTime(),dateObj:d};
+  });
+}
+function getWeekLabel(offset=0){
+  const days=getWeekDays(offset);
+  const fmt=d=>d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+  if(offset===0)return'Questa settimana';
+  if(offset===1)return'Prossima settimana';
+  if(offset===-1)return'Settimana scorsa';
+  return`${fmt(days[0].dateObj)} – ${fmt(days[6].dateObj)}`;
+}
+function isUrgent(s){if(!s)return false;return(new Date(s)-new Date())/(1000*60*60*24)<=2;}
+function fmtDate(s){if(!s)return'';return new Date(s).toLocaleDateString('it-IT',{day:'numeric',month:'short'});}
+function loadItems(){try{const s=localStorage.getItem('piano_items_v3');return s?JSON.parse(s):null;}catch{return null;}}
+function saveItems(i){try{localStorage.setItem('piano_items_v3',JSON.stringify(i));}catch{}}
+function getSearchCount(){try{const d=JSON.parse(localStorage.getItem('piano_searches_v2')||'{}');return d[new Date().toISOString().slice(0,7)]||0;}catch{return 0;}}
+function incSearch(){try{const d=JSON.parse(localStorage.getItem('piano_searches_v2')||'{}');const m=new Date().toISOString().slice(0,7);d[m]=(d[m]||0)+1;localStorage.setItem('piano_searches_v2',JSON.stringify(d));return d[m];}catch{return 0;}}
+
+const DEFAULT=[
+  {id:1,text:'Chiamare il commercialista',ci:0,dayKey:null,expanded:false,subtasks:[
+    {id:11,text:'Raccogliere estratto di matrimonio',done:false,deadline:'2026-05-08',aiResponse:null,aiLoading:false},
+    {id:12,text:'Stampare ultime 3 fatture',done:false,deadline:'2026-05-07',aiResponse:null,aiLoading:false},
+  ]},
+  {id:2,text:'Foto prodotti Caleea',ci:1,dayKey:null,expanded:false,subtasks:[{id:21,text:'Preparare sfondo bianco',done:false,deadline:'',aiResponse:null,aiLoading:false}]},
+  {id:3,text:'Aggiornare Shopify',ci:2,dayKey:null,expanded:false,subtasks:[]},
+  {id:4,text:'Pagare fattura fornitore',ci:3,dayKey:null,expanded:false,subtasks:[]},
+  {id:5,text:'Rispondere alle email',ci:4,dayKey:null,expanded:false,subtasks:[]},
+  {id:6,text:'Post Instagram Caleea',ci:5,dayKey:null,expanded:false,subtasks:[]},
+];
+
+function App(){
+  const [items,setItemsRaw]=useState(()=>loadItems()||DEFAULT);
+  const [tab,setTab]=useState('priorita');
+  const [text,setText]=useState('');
+  const [modal,setModal]=useState(null);
+  const [expandedDays,setExpandedDays]=useState({});
+  const [subInputs,setSubInputs]=useState({});
+  const [searchCount,setSearchCount]=useState(getSearchCount);
+  const [weekOffset,setWeekOffset]=useState(0);
+  const DAYS=getWeekDays(weekOffset);
+  const remaining=MAX_SEARCHES-searchCount;
+
+  const setItems=val=>{setItemsRaw(prev=>{const next=typeof val==='function'?val(prev):val;saveItems(next);return next;});};
+  const unassigned=items.filter(i=>!i.dayKey);
+  const add=()=>{if(!text.trim())return;setItems(p=>[...p,{id:Date.now(),text:text.trim(),ci:p.length%PRIO_COLORS.length,dayKey:null,expanded:false,subtasks:[]}]);setText('');};
+  const del=id=>setItems(p=>p.filter(x=>x.id!==id));
+  const assign=(id,dayKey)=>setItems(p=>p.map(x=>x.id===id?{...x,dayKey}:x));
+  const toggleExpand=id=>setItems(p=>p.map(x=>x.id===id?{...x,expanded:!x.expanded}:x));
+  const toggleSub=(pid,sid)=>setItems(p=>p.map(x=>x.id===pid?{...x,subtasks:x.subtasks.map(s=>s.id===sid?{...s,done:!s.done}:s)}:x));
+  const delSub=(pid,sid)=>setItems(p=>p.map(x=>x.id===pid?{...x,subtasks:x.subtasks.filter(s=>s.id!==sid)}:x));
+  const addSub=pid=>{const inp=subInputs[pid]||{};if(!inp.text?.trim())return;setItems(p=>p.map(x=>x.id===pid?{...x,subtasks:[...x.subtasks,{id:Date.now(),text:inp.text.trim(),done:false,deadline:inp.deadline||'',aiResponse:null,aiLoading:false}]}:x));setSubInputs(p=>({...p,[pid]:{text:'',deadline:''}}));};
+
+  const getPColor=p=>{
+    if(p.dayKey){for(let w=-12;w<=12;w++){const wd=getWeekDays(w);const found=wd.find(d=>d.key===p.dayKey);if(found)return DAY_COLORS[found.dayIndex];}}
+    return PRIO_COLORS[p.ci%PRIO_COLORS.length];
+  };
+
+  const askAI=async(pid,sid,question)=>{
+    if(remaining<=0){alert(`Hai usato tutte le ${MAX_SEARCHES} ricerche AI di questo mese.`);return;}
+    setItems(p=>p.map(x=>x.id===pid?{...x,subtasks:x.subtasks.map(s=>s.id===sid?{...s,aiLoading:true,aiResponse:null}:s)}:x));
+    setSearchCount(incSearch());
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-client-side-api-key-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:350,messages:[{role:'user',content:`Sono in Italia. Come faccio praticamente questo: "${question}"? Rispondimi in italiano con massimo 4 punti concreti e brevi. Dove vado, cosa porto, quanto costa se rilevante.`}]})});
+      const data=await res.json();
+      const answer=data?.content?.[0]?.text||'Nessuna risposta.';
+      setItems(p=>p.map(x=>x.id===pid?{...x,subtasks:x.subtasks.map(s=>s.id===sid?{...s,aiLoading:false,aiResponse:answer}:s)}:x));
+    }catch{
+      setItems(p=>p.map(x=>x.id===pid?{...x,subtasks:x.subtasks.map(s=>s.id===sid?{...s,aiLoading:false,aiResponse:'Errore: verifica la chiave API nel file index.html'}:s)}:x));
+    }
+  };
+
+  const modalItem=modal?items.find(x=>x.id===modal):null;
+  const toggleDayExpand=key=>setExpandedDays(p=>({...p,[key]:!p[key]}));
+
+  const renderPcard=p=>{
+    const c=getPColor(p);
+    const inp=subInputs[p.id]||{};
+    const doneSubs=p.subtasks.filter(s=>s.done).length;
+    const assignedDay=p.dayKey?DAYS.find(d=>d.key===p.dayKey):null;
+    return(
+      <div key={p.id} className="pcard">
+        <div className="pcard-bar" style={{background:c.bg}}/>
+        <div className="pcard-main">
+          <div className="pcard-dot" style={{background:c.bg}}/>
+          <span className="pcard-text">{p.text}</span>
+          {p.subtasks.length>0&&<span style={{fontSize:10,color:c.text,background:c.light,padding:'2px 6px',borderRadius:5,flexShrink:0}}>{doneSubs}/{p.subtasks.length}</span>}
+          <button className="pcard-badge" style={{background:assignedDay?c.light:'#F0EDE7',color:assignedDay?c.text:'#9E9488'}} onClick={()=>setModal(p.id)}>{assignedDay?assignedDay.label:'+ Giorno'}</button>
+          <button className="pcard-del" onClick={()=>del(p.id)}>✕</button>
+        </div>
+        {p.expanded&&(
+          <div className="subtasks">
+            {p.subtasks.map(s=>(
+              <div key={s.id}>
+                <div className="subtask-item">
+                  <button className={`subtask-check${s.done?' done':''}`} onClick={()=>toggleSub(p.id,s.id)}>{s.done?'✓':''}</button>
+                  <div className="subtask-content">
+                    <div className={`subtask-text${s.done?' done':''}`}>{s.text}</div>
+                    {s.deadline&&<div className={`subtask-deadline${isUrgent(s.deadline)?' urgent':''}`}>⏰ {fmtDate(s.deadline)}</div>}
+                  </div>
+                  <div className="subtask-actions">
+                    <button className="ai-btn" disabled={s.aiLoading||remaining<=0} onClick={()=>askAI(p.id,s.id,s.text)}>{s.aiLoading?'...':'🔍 AI'}</button>
+                    <button className="subtask-del" onClick={()=>delSub(p.id,s.id)}>✕</button>
+                  </div>
+                </div>
+                {s.aiLoading&&<div className="ai-loading"><div className="ai-dot"/><div className="ai-dot"/><div className="ai-dot"/><span>Claude sta cercando...</span></div>}
+                {s.aiResponse&&<div className="ai-response"><div className="ai-response-text">{s.aiResponse}</div></div>}
+              </div>
+            ))}
+            <div className="add-subtask">
+              <input className="add-sub-input" placeholder="Aggiungi step..." value={inp.text||''} onChange={e=>setSubInputs(prev=>({...prev,[p.id]:{...inp,text:e.target.value}}))} onKeyDown={e=>e.key==='Enter'&&addSub(p.id)}/>
+              <input type="date" className="add-sub-date" value={inp.deadline||''} onChange={e=>setSubInputs(prev=>({...prev,[p.id]:{...inp,deadline:e.target.value}}))}/>
+              <button className="add-sub-btn" onClick={()=>addSub(p.id)}>+</button>
+            </div>
+          </div>
+        )}
+        <button className="expand-btn" onClick={()=>toggleExpand(p.id)}>{p.expanded?'▲ Chiudi':'▼ Step '+(p.subtasks.length>0?`(${p.subtasks.length})`:'+ aggiungi')}</button>
+      </div>
+    );
+  };
+
+  return(
+    <div className="shell">
+      <div className="header">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <span className="app-name">piano.</span>
+          <span style={{fontSize:11,fontWeight:600,padding:'2px 8px',borderRadius:10,background:remaining<=3?'#FFF0F0':'#F0ECFC',color:remaining<=3?'#FF6B6B':'#9B8EC4'}}>🔍 {remaining}/{MAX_SEARCHES}</span>
+        </div>
+        <div className="week-nav">
+          <button className="nav-btn" onClick={()=>setWeekOffset(w=>w-1)}>‹</button>
+          <button className="today-btn" onClick={()=>setWeekOffset(0)}>Oggi</button>
+          <span className="week-label-text">{getWeekLabel(weekOffset)}</span>
+          <button className="nav-btn" onClick={()=>setWeekOffset(w=>w+1)}>›</button>
+        </div>
+      </div>
+      <div className="search-bar">
+        <div className="search-row">
+          <input className="search-input" placeholder="Aggiungi una priorità..." value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()}/>
+          <button className="search-btn" onClick={add}>+</button>
+        </div>
+      </div>
+      <div className="tabs">
+        <button className={`tab${tab==='priorita'?' active':''}`} onClick={()=>setTab('priorita')}>Priorità</button>
+        <button className={`tab${tab==='settimana'?' active':''}`} onClick={()=>setTab('settimana')}>Settimana</button>
+      </div>
+      <div className="content">
+        {tab==='priorita'?(
+          <div className="prio-list">
+            {unassigned.length>0&&<><div className="sec-label">Non assegnate ({unassigned.length})</div>{unassigned.map(p=>renderPcard(p))}</>}
+            {DAYS.map(d=>{const dp=items.filter(p=>p.dayKey===d.key);if(!dp.length)return null;const c=DAY_COLORS[d.dayIndex];return(<div key={d.key}><div className="sec-label" style={{color:c.text}}>{d.label} {d.num} {d.month}</div>{dp.map(p=>renderPcard(p))}</div>);})}
+            {items.length===0&&<div style={{textAlign:'center',padding:'40px 0',color:'#C8BFB0',fontSize:14}}>Aggiungi la tua prima priorità 👆</div>}
+          </div>
+        ):(
+          <div className="week-view">
+            <div className="unassigned">
+              <span className="u-label">Libere</span>
+              {unassigned.length===0?<span style={{fontSize:12,color:'#C8BFB0',fontStyle:'italic'}}>Tutte assegnate 🎉</span>:unassigned.map(p=>{const c=PRIO_COLORS[p.ci%PRIO_COLORS.length];return(<div key={p.id} className="mini" style={{background:c.light,color:c.text}} onClick={()=>setModal(p.id)}><div className="mini-dot" style={{background:c.bg}}/>{p.text}</div>);})}
+            </div>
+            <div className="days-wrap">
+              {DAYS.map(d=>{
+                const dp=items.filter(p=>p.dayKey===d.key);
+                const isOpen=expandedDays[d.key];
+                const c=DAY_COLORS[d.dayIndex];
+                return(
+                  <div key={d.key} className="day-row" style={{background:c.light}}>
+                    <div className="day-row-header" onClick={()=>toggleDayExpand(d.key)}>
+                      <div className="day-pill" style={{background:d.isToday?'#1C1C1C':c.bg}}>
+                        <span className="dn" style={{color:'rgba(255,255,255,.7)'}}>{d.label}</span>
+                        <span className="dd" style={{color:'white'}}>{d.num}</span>
+                      </div>
+                      <div className="day-tasks-preview">
+                        {dp.length>0?dp.slice(0,2).map(p=><span key={p.id} className="day-chip" style={{background:'rgba(255,255,255,.8)',color:c.text}}>{p.text}</span>):<span style={{fontSize:12,color:c.text,opacity:.5,fontStyle:'italic'}}>Nessuna priorità</span>}
+                        {dp.length>2&&<span style={{fontSize:11,color:c.text,opacity:.6}}>+{dp.length-2}</span>}
+                      </div>
+                      <span style={{fontSize:12,color:c.text,opacity:.5,marginLeft:'auto',flexShrink:0}}>{isOpen?'▲':'▼'}</span>
+                    </div>
+                    {isOpen&&dp.length>0&&(
+                      <div className="day-tasks-expanded">
+                        {dp.map(p=>(
+                          <div key={p.id} className="day-task-row">
+                            <div className="day-task-dot" style={{background:c.bg}}/>
+                            <span className="day-task-text">{p.text}</span>
+                            {p.subtasks.length>0&&<span style={{fontSize:10,color:c.text,background:'rgba(255,255,255,.7)',padding:'2px 6px',borderRadius:4,flexShrink:0}}>{p.subtasks.filter(s=>s.done).length}/{p.subtasks.length}</span>}
+                            <button className="day-task-move" onClick={()=>setModal(p.id)}>Sposta</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+      {modal&&modalItem&&(
+        <div className="overlay" onClick={()=>setModal(null)}>
+          <div className="sheet" onClick={e=>e.stopPropagation()}>
+            <div className="sheet-title">Quando?</div>
+            <div className="sheet-sub"><div style={{width:8,height:8,borderRadius:'50%',background:getPColor(modalItem).bg,flexShrink:0}}/>{modalItem.text}</div>
+            <div className="day-grid">
+              {DAYS.map(d=>(<button key={d.key} className={`day-opt${modalItem.dayKey===d.key?' sel':''}`} onClick={()=>{assign(modalItem.id,d.key);setModal(null);}}><div className="don">{d.label}</div><div className="dod">{d.num}</div></button>))}
+              <button className="unassign-opt" onClick={()=>{assign(modalItem.id,null);setModal(null);}}><div className="don" style={{color:'#9E9488'}}>Rimuovi</div><div className="dod" style={{color:'#9E9488'}}>—</div></button>
+            </div>
+            <button className="cancel" onClick={()=>setModal(null)}>Annulla</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
